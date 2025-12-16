@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import authRouter from './routes/authRoute';
 import adminRouter from './routes/adminRoute';
+import aiRouter from './routes/aiRoute';
 import prisma from './lib/prisma';
 
 const host = process.env.HOST ?? 'localhost';
@@ -26,6 +27,9 @@ app.use('/auth', authRouter);
 
 // admin router
 app.use('/admin', adminRouter);
+
+// AI router
+app.use('/ai', aiRouter);
 
 // GET / - show all Prisma data (users, businesses, categories)
 app.get('/', async (req, res) => {

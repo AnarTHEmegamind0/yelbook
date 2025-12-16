@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Bot } from 'lucide-react';
 import { BusinessCard } from './components/business-card';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
@@ -177,6 +177,13 @@ export default function YellowBooksPage() {
               className="text-foreground hover:text-accent transition-colors"
             >
               Хайх
+            </Link>
+            <Link
+              href="/assistant"
+              className="flex items-center gap-1.5 text-foreground hover:text-accent transition-colors"
+            >
+              <Bot className="w-4 h-4" />
+              AI Туслах
             </Link>
             <Link href="/auth/login">
               <Button

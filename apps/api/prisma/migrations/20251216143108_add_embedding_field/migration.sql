@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Business" ADD COLUMN     "embedding" DOUBLE PRECISION[] DEFAULT ARRAY[]::DOUBLE PRECISION[];
+
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "updatedAt" DROP DEFAULT;
