@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 import express from 'express';
 import cors from 'cors';
-// import authRouter from './routes/authRoute';
+import authRouter from './routes/authRoute';
 import adminRouter from './routes/adminRoute';
 import prisma from './lib/prisma';
 
@@ -14,15 +14,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-nextauth-token'],
   })
 );
 
 //  auth router
-// app.use('/auth', authRouter);
+app.use('/auth', authRouter);
 
 // admin router
 app.use('/admin', adminRouter);
@@ -49,6 +49,28 @@ app.get('/search', async (req, res) => {
   } catch (error) {
     console.error('Error fetching data:', error);
     return res.status(500).json({ error: 'Failed to fetch data' });
+  }
+});
+
+// GET /businesses/:id - get single business by id (public)
+app.get('/businesses/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const business = await prisma.business.findUnique({
+      where: { id },
+      include: {
+        category: true,
+      },
+    });
+
+    if (!business) {
+      return res.status(404).json({ error: 'Business not found' });
+    }
+
+    return res.json({ business });
+  } catch (error) {
+    console.error('/businesses/:id error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 

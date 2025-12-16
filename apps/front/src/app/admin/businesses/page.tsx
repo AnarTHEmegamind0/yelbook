@@ -11,6 +11,7 @@ import {
 } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Edit2, Trash2, Plus } from 'lucide-react';
+import { useAuthFetch } from '../../lib/hooks/useAuthFetch';
 
 interface Business {
   id: string;
@@ -42,21 +43,16 @@ export default function BusinessesPage() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const { get, del, isAuthenticated, isLoading } = useAuthFetch();
 
   const fetchData = async () => {
+    if (!isAuthenticated) return;
     try {
       setLoading(true);
-      const [businessRes, categoryRes] = await Promise.all([
-        fetch(`${baseUrl}/admin/businesses`),
-        fetch(`${baseUrl}/admin/categories`),
+      const [businessData, categoryData] = await Promise.all([
+        get<{ businesses: Business[] }>('/admin/businesses'),
+        get<{ categories: Category[] }>('/admin/categories'),
       ]);
-      if (!businessRes.ok || !categoryRes.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      const businessData = await businessRes.json();
-      const categoryData = await categoryRes.json();
       setBusinesses(businessData.businesses || []);
       setCategories(categoryData.categories || []);
     } catch (err) {
@@ -67,24 +63,20 @@ export default function BusinessesPage() {
   };
 
   useEffect(() => {
-    fetchData();
+    if (!isLoading && isAuthenticated) {
+      fetchData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAuthenticated, isLoading]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Энэ бизнесийг устгах уу?')) return;
     try {
-      const res = await fetch(`${baseUrl}/admin/businesses/${id}`, {
-        method: 'DELETE',
-      });
-      if (res.ok) {
-        fetchData();
-      } else {
-        alert('Устгахад алдаа гарлаа');
-      }
+      await del(`/admin/businesses/${id}`);
+      fetchData();
     } catch (err) {
       console.error(err);
-      alert('Сүлжээний алдаа');
+      alert('Устгахад алдаа гарлаа');
     }
   };
 
@@ -245,28 +237,19 @@ function BusinessForm({
     timetable: '',
   });
   const [submitting, setSubmitting] = useState(false);
+  const { post } = useAuthFetch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
     setSubmitting(true);
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${baseUrl}/admin/businesses`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        onSuccess();
-        onClose();
-      } else {
-        alert('Бизнес нэмэхэд алдаа гарлаа');
-      }
+      await post('/admin/businesses', formData);
+      onSuccess();
+      onClose();
     } catch (err) {
       console.error(err);
-      alert('Сүлжээний алдаа');
+      alert('Бизнес нэмэхэд алдаа гарлаа');
     } finally {
       setSubmitting(false);
     }
@@ -502,27 +485,18 @@ function EditBusinessForm({
     timetable: business.timetable,
   });
   const [submitting, setSubmitting] = useState(false);
+  const { put } = useAuthFetch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
     setSubmitting(true);
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${baseUrl}/admin/businesses/${business.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        onSuccess();
-      } else {
-        alert('Бизнес засахад алдаа гарлаа');
-      }
+      await put(`/admin/businesses/${business.id}`, formData);
+      onSuccess();
     } catch (err) {
       console.error(err);
-      alert('Сүлжээний алдаа');
+      alert('Бизнес засахад алдаа гарлаа');
     } finally {
       setSubmitting(false);
     }

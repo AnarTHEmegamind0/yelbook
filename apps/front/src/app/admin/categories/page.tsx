@@ -11,6 +11,7 @@ import {
 } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Edit2, Trash2, Plus } from 'lucide-react';
+import { useAuthFetch } from '../../lib/hooks/useAuthFetch';
 
 interface Category {
   id: string;
@@ -25,15 +26,13 @@ export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const { get, del, isAuthenticated, isLoading } = useAuthFetch();
 
   const fetchCategories = async () => {
+    if (!isAuthenticated) return;
     try {
       setLoading(true);
-      const res = await fetch(`${baseUrl}/admin/categories`);
-      if (!res.ok) throw new Error('Failed to fetch');
-      const data = await res.json();
+      const data = await get<{ categories: Category[] }>('/admin/categories');
       setCategories(data.categories || []);
     } catch (err) {
       console.error('Ангилал татахад алдаа:', err);
@@ -45,24 +44,20 @@ export default function CategoriesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Энэ ангиллыг устгах уу?')) return;
     try {
-      const res = await fetch(`${baseUrl}/admin/categories/${id}`, {
-        method: 'DELETE',
-      });
-      if (res.ok) {
-        fetchCategories();
-      } else {
-        alert('Устгахад алдаа гарлаа');
-      }
+      await del(`/admin/categories/${id}`);
+      fetchCategories();
     } catch (err) {
       console.error(err);
-      alert('Сүлжээний алдаа');
+      alert('Устгахад алдаа гарлаа');
     }
   };
 
   useEffect(() => {
-    fetchCategories();
+    if (!isLoading && isAuthenticated) {
+      fetchCategories();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAuthenticated, isLoading]);
 
   const filteredCategories = categories.filter((c) =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -188,28 +183,19 @@ function CategoryForm({
 }) {
   const [name, setName] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const { post } = useAuthFetch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting || !name.trim()) return;
     setSubmitting(true);
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${baseUrl}/admin/categories`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() }),
-      });
-      if (res.ok) {
-        onSuccess();
-        onClose();
-      } else {
-        alert('Ангилал нэмэхэд алдаа гарлаа');
-      }
+      await post('/admin/categories', { name: name.trim() });
+      onSuccess();
+      onClose();
     } catch (err) {
       console.error(err);
-      alert('Сүлжээний алдаа');
+      alert('Ангилал нэмэхэд алдаа гарлаа');
     } finally {
       setSubmitting(false);
     }
@@ -269,27 +255,18 @@ function EditCategoryForm({
 }) {
   const [name, setName] = useState(category.name);
   const [submitting, setSubmitting] = useState(false);
+  const { put } = useAuthFetch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting || !name.trim()) return;
     setSubmitting(true);
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${baseUrl}/admin/categories/${category.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() }),
-      });
-      if (res.ok) {
-        onSuccess();
-      } else {
-        alert('Засахад алдаа гарлаа');
-      }
+      await put(`/admin/categories/${category.id}`, { name: name.trim() });
+      onSuccess();
     } catch (err) {
       console.error(err);
-      alert('Сүлжээний алдаа');
+      alert('Засахад алдаа гарлаа');
     } finally {
       setSubmitting(false);
     }

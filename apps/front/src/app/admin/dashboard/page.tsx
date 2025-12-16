@@ -9,21 +9,24 @@ import {
   CardTitle,
 } from '../../components/ui/card';
 import { Building2, FolderOpen, TrendingUp } from 'lucide-react';
+import { useAuthFetch } from '../../lib/hooks/useAuthFetch';
 
 export default function AdminDashboard() {
   const [businessCount, setBusinessCount] = useState(0);
   const [categoryCount, setCategoryCount] = useState(0);
   const [loading, setLoading] = useState(true);
-
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const { get, isAuthenticated } = useAuthFetch();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      if (!isAuthenticated) return;
+
       try {
         setLoading(true);
-        const res = await fetch(`${baseUrl}/admin/dashboard`);
-        if (!res.ok) throw new Error('Failed to fetch');
-        const data = await res.json();
+        const data = await get<{
+          businessCount: number;
+          categoryCount: number;
+        }>('/admin/dashboard');
         setBusinessCount(data.businessCount || 0);
         setCategoryCount(data.categoryCount || 0);
       } catch (err) {
@@ -33,8 +36,7 @@ export default function AdminDashboard() {
       }
     };
     fetchDashboardData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [get, isAuthenticated]);
 
   const stats = [
     {

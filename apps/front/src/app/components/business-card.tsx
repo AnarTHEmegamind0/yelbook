@@ -22,7 +22,7 @@ export function BusinessCard({
   image,
 }: BusinessCardProps) {
   return (
-    <Link href={`/business/${id}`}>
+    <Link href={`/${id}`}>
       <div className="h-full bg-card border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
         {image && (
           <div className="relative h-40 w-full bg-muted overflow-hidden">

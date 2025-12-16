@@ -1,7 +1,11 @@
 import express from 'express';
 import prisma from '../lib/prisma';
+import { requireAdmin } from '../middleware/authMiddleware';
 
 const adminRouter = express.Router();
+
+// Apply admin authentication to all routes
+adminRouter.use(requireAdmin);
 
 adminRouter.get('/dashboard', async (req, res) => {
   try {

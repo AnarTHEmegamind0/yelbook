@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma, Role } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import 'dotenv/config';
@@ -22,11 +22,19 @@ const prisma = new PrismaClient({ adapter });
 
 const SALT_ROUNDS = 10;
 
-const userData: { name: string; email: string; password: string }[] = [
+const userData: {
+  name: string;
+  email: string;
+  password: string;
+  role: Role;
+  githubId?: string;
+}[] = [
   {
     name: 'ADMIN',
     email: 'admin@gmail.com',
     password: 'Admin1234',
+    role: 'ADMIN',
+    githubId: process.env.ADMIN_GITHUB_ID || undefined,
   },
 ];
 
@@ -38,11 +46,13 @@ const categoryData: Prisma.CategoryCreateInput[] = [
   { name: 'Дэлгүүр' },
 ];
 
+// S3 bucket URL for images
+const S3_BASE_URL = 'https://yelbook-web-jaa.s3.us-east-1.amazonaws.com';
+
 const businessData: Omit<Prisma.BusinessCreateInput, 'category'>[] = [
   {
     name: 'Modern Nomads Сэнтрал',
-    imageUrl:
-      'https://mongolia-guide.com/uploads/main/ulaanbaatar/places/square.jpg',
+    imageUrl: `${S3_BASE_URL}/square.jpg`,
     description:
       'Үндэсний болон европ хоолны өргөн сонголттой, уламжлалт интерьертэй дундаж-дээд ангиллын ресторан.',
     address:
@@ -57,8 +67,7 @@ const businessData: Omit<Prisma.BusinessCreateInput, 'category'>[] = [
   },
   {
     name: 'Beer House Chain Bar',
-    imageUrl:
-      'https://mongolia-guide.com/uploads/main/ulaanbaatar/places/square.jpg',
+    imageUrl: `${S3_BASE_URL}/square.jpg`,
     description:
       'Крафт шар айраг, коктейль, амьд хөгжимтэй, орой үдэш цэнгэхэд тохиромжтой паб ба бар.',
     address:
@@ -73,8 +82,7 @@ const businessData: Omit<Prisma.BusinessCreateInput, 'category'>[] = [
   },
   {
     name: "Millie's Espresso",
-    imageUrl:
-      'https://mongolia-guide.com/uploads/main/ulaanbaatar/places/square.jpg',
+    imageUrl: `${S3_BASE_URL}/square.jpg`,
     description:
       'Барууны хэв маягийн, өглөөний цай, кофе, амттан, хөнгөн хоолтой тохилог кафе.',
     address:
@@ -89,8 +97,7 @@ const businessData: Omit<Prisma.BusinessCreateInput, 'category'>[] = [
   },
   {
     name: 'Shangri-La Улаанбаатар',
-    imageUrl:
-      'https://mongolia-guide.com/uploads/main/ulaanbaatar/places/square.jpg',
+    imageUrl: `${S3_BASE_URL}/square.jpg`,
     description:
       'Таван одтой, хотын төвд байрлах, конвенц, арга хэмжээ болон бизнес/аялагчдад зориулсан тансаг зочид буудал.',
     address:
@@ -106,8 +113,7 @@ const businessData: Omit<Prisma.BusinessCreateInput, 'category'>[] = [
   },
   {
     name: 'Улсын Их Дэлгүүр',
-    imageUrl:
-      'https://mongolia-guide.com/uploads/main/ulaanbaatar/places/square.jpg',
+    imageUrl: `${S3_BASE_URL}/square.jpg`,
     description:
       'Хотын төвд байрлах, хувцас, гоёл чимэглэлийн бараа, цахилгаан хэрэгсэл, хүнс, бэлэг дурсгалын өргөн сонголттой их дэлгүүр.',
     address:
@@ -123,8 +129,7 @@ const businessData: Omit<Prisma.BusinessCreateInput, 'category'>[] = [
   },
   {
     name: 'Zen Japanese Restaurant',
-    imageUrl:
-      'https://mongolia-guide.com/uploads/main/ulaanbaatar/places/square.jpg',
+    imageUrl: `${S3_BASE_URL}/square.jpg`,
     description:
       'Blue Sky tower-ийн дээд давхарт байрлах, жинхэнэ япон суши, загасны хоолны цэс бүхий ресторан.',
     address:
@@ -140,8 +145,7 @@ const businessData: Omit<Prisma.BusinessCreateInput, 'category'>[] = [
   },
   {
     name: 'Sky Lounge – Blue Sky',
-    imageUrl:
-      'https://mongolia-guide.com/uploads/main/ulaanbaatar/places/square.jpg',
+    imageUrl: `${S3_BASE_URL}/square.jpg`,
     description:
       'Хотыг бүхэлд нь тольдох боломжтой, коктейль, жazz/house хөгжимтэй дээврийн лаунж бар.',
     address:
@@ -156,8 +160,7 @@ const businessData: Omit<Prisma.BusinessCreateInput, 'category'>[] = [
   },
   {
     name: 'Caffe Bene – Их Дэлгүүр салбар',
-    imageUrl:
-      'https://mongolia-guide.com/uploads/main/ulaanbaatar/places/square.jpg',
+    imageUrl: `${S3_BASE_URL}/square.jpg`,
     description:
       'Кофе, амттан, сэндвич, амрах булан бүхий, сурагчид болон оффисынхонд түгээмэл кофе шоп.',
     address:
@@ -173,8 +176,7 @@ const businessData: Omit<Prisma.BusinessCreateInput, 'category'>[] = [
   },
   {
     name: 'Blue Sky Hotel & Tower',
-    imageUrl:
-      'https://mongolia-guide.com/uploads/main/ulaanbaatar/places/square.jpg',
+    imageUrl: `${S3_BASE_URL}/square.jpg`,
     description:
       'Сүхбаатарын талбайн хажууд байрлах, хотын тэнгэр баганадсан шилэн цамхаг, бизнес болон аяллын зорилтот тансаг зочид буудал.',
     address:
@@ -190,8 +192,7 @@ const businessData: Omit<Prisma.BusinessCreateInput, 'category'>[] = [
   },
   {
     name: 'Интерном Номын Дэлгүүр – Төв салбар',
-    imageUrl:
-      'https://mongolia-guide.com/uploads/main/ulaanbaatar/places/square.jpg',
+    imageUrl: `${S3_BASE_URL}/square.jpg`,
     description:
       'Монголын хамгийн том номын сүлжээний төв салбар, ном, тоглоом, бичиг хэрэг, бэлэг дурсгалын өргөн сонголттой.',
     address:
@@ -224,17 +225,22 @@ async function createUsers() {
   console.log('Creating users...');
 
   for (const u of userData) {
-    const hashedPassword = await bcryptjs.hash(u.password, SALT_ROUNDS);
+    const hashedPassword = u.password
+      ? await bcryptjs.hash(u.password, SALT_ROUNDS)
+      : null;
 
     await prisma.user.create({
       data: {
-        ...u,
+        name: u.name,
+        email: u.email,
         password: hashedPassword,
+        role: u.role,
+        githubId: u.githubId || null,
       },
     });
   }
 
-  console.log(`Created ${userData.length} users`);
+  console.log(`Created ${userData.length} users (including admin)`);
 }
 
 async function createCategories() {
@@ -301,6 +307,9 @@ async function main() {
     await createBusinesses(categories);
 
     console.log('Database seeding completed successfully!');
+    console.log(
+      'Admin user created: admin@gmail.com / Admin1234 (role: ADMIN)'
+    );
   } catch (error) {
     console.error('Error during seeding:', error);
     throw error;

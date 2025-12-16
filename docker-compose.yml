@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: yelbook-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: yelbook
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-yelbook123}
+      POSTGRES_DB: yelbook
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5434:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U yelbook -d yelbook']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/yelbook-backend:${IMAGE_TAG:-latest}
+    container_name: yelbook-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://yelbook:${POSTGRES_PASSWORD:-yelbook123}@postgres:5432/yelbook
+      HOST: 0.0.0.0
+      PORT: 3001
+      NODE_ENV: production
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    ports:
+      - '3001:3001'
+
+  frontend:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/yelbook-frontend:${IMAGE_TAG:-latest}
+    container_name: yelbook-frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: ${API_URL:-http://localhost:3001}
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    ports:
+      - '3000:3000'
+
+volumes:
+  postgres_data:

@@ -12,36 +12,46 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  password String?
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String?
+  role      Role     @default(USER)
+  githubId  String?  @unique
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Business {
-  id        String   @id @default(uuid())
-  name      String
-  description String
-  address     String
-  phone       String
-  email       String   @unique
-  website     String
+  id           String   @id @default(uuid())
+  name         String
+  description  String
+  address      String
+  phone        String
+  email        String   @unique
+  website      String
   googleMapUrl String
-  facebookUrl String
+  facebookUrl  String
   instagramUrl String
-  imageUrl    String?
+  imageUrl     String?
   timetable    String
-  category    Category @relation(fields: [categoryId], references: [id])
-  categoryId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  category     Category @relation(fields: [categoryId], references: [id])
+  categoryId   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Category {
-  id        String   @id @default(uuid())
+  id        String     @id @default(uuid())
   name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Business Business[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  Business  Business[]
 }

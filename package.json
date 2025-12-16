@@ -8,7 +8,7 @@
     "dev": "NX_DAEMON=false nx run-many --target=serve --all --parallel",
     "build": "nx run-many --target=build --all",
     "start:front": "nx serve-static front",
-    "start:api": "node dist/apps/api/main.js",
+    "start:api": "node --env-file=apps/api/.env apps/api/dist/main.js",
     "start": "npm run start:front & npm run start:api",
     "lint": "nx run-many --target=lint --all",
     "typecheck": "nx run-many --target=typecheck --all",

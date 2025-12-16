@@ -1,12 +1,32 @@
-'use client';
-
-import { use, useState, useEffect } from 'react';
+import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, MapPin, Phone, Globe } from 'lucide-react';
+import Image from 'next/image';
+import { ChevronLeft, MapPin, Phone, Globe, Mail, Clock } from 'lucide-react';
+import { Badge } from '../components/ui/badge';
 
-import { RatingStars } from '../../components/rating-stars';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
+// SSG: Generate static params at build time
+export async function generateStaticParams() {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+  try {
+    const res = await fetch(`${baseUrl}/search`);
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    const businesses = data.businesses || [];
+
+    return businesses.map((business: { id: string }) => ({
+      id: business.id,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+// Enable on-demand revalidation (called via API route)
+export const dynamicParams = true;
+export const revalidate = false; // Static until revalidated
 
 interface Business {
   id: string;
@@ -19,7 +39,7 @@ interface Business {
   googleMapUrl: string;
   facebookUrl: string;
   instagramUrl: string;
-  imageUrl: string;
+  imageUrl?: string;
   timetable: string;
   categoryId: string;
   category?: {
@@ -28,88 +48,47 @@ interface Business {
   };
 }
 
-export default function BusinessDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
-  const [business, setBusiness] = useState<Business | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+async function getBusiness(id: string): Promise<Business | null> {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-  useEffect(() => {
-    const fetchBusiness = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(`${baseUrl}/admin/businesses/${id}`);
-        if (res.ok) {
-          const data = await res.json();
-          setBusiness(data.business);
-        } else if (res.status === 404) {
-          setError('Бизнес олдсонгүй');
-        } else {
-          setError('Өгөгдөл татахад алдаа гарлаа');
-        }
-      } catch (err) {
-        console.error('Өгөгдөл татахад алдаа:', err);
-        setError('Сүлжээний алдаа');
-      } finally {
-        setLoading(false);
-      }
-    };
+  try {
+    const res = await fetch(`${baseUrl}/businesses/${id}`, {
+      next: { tags: [`business-${id}`] }, // Tag for on-demand revalidation
+    });
 
-    fetchBusiness();
-  }, [id, baseUrl]);
+    if (!res.ok) return null;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-lg text-muted-foreground">Ачааллаж байна...</p>
-      </div>
-    );
+    const data = await res.json();
+    return data.business || null;
+  } catch {
+    return null;
+  }
+}
+
+// Business details component
+async function BusinessDetails({ id }: { id: string }) {
+  const business = await getBusiness(id);
+
+  if (!business) {
+    notFound();
   }
 
-  if (error || !business) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-lg text-muted-foreground mb-4">
-            {error || 'Бизнес олдсонгүй'}
-          </p>
-          <Link href="/search">
-            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              Хайлт руу буцах
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const imageUrl = business.imageUrl
+    ? business.imageUrl.startsWith('/')
+      ? business.imageUrl
+      : business.imageUrl
+    : '/placeholder.svg';
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link
-            href="/search"
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-          >
-            <ChevronLeft className="w-5 h-5 text-accent" />
-            <span className="font-semibold text-foreground">Буцах</span>
-          </Link>
-        </div>
-      </header>
-
-      {/* Hero */}
+    <>
+      {/* Hero Image */}
       <section className="relative h-64 overflow-hidden bg-muted">
-        <img
-          src={business.imageUrl}
+        <Image
+          src={imageUrl}
           alt={business.name}
+          fill
           className="object-cover"
+          priority
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-black/30" />
@@ -129,6 +108,7 @@ export default function BusinessDetailPage({
               <p className="text-lg text-foreground max-w-2xl mb-6">
                 {business.description}
               </p>
+
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2 text-foreground">
                   <MapPin className="w-5 h-5 text-accent" />
@@ -139,15 +119,23 @@ export default function BusinessDetailPage({
                   <span>{business.phone}</span>
                 </div>
                 <div className="flex items-center gap-2 text-foreground">
+                  <Mail className="w-5 h-5 text-accent" />
+                  <span>{business.email}</span>
+                </div>
+                <div className="flex items-center gap-2 text-foreground">
                   <Globe className="w-5 h-5 text-accent" />
                   <a
                     href={business.website}
                     target="_blank"
-                    className="text-accent hover:underline"
                     rel="noreferrer"
+                    className="text-accent hover:underline"
                   >
                     {business.website.replace(/^https?:\/\//, '')}
                   </a>
+                </div>
+                <div className="flex items-center gap-2 text-foreground">
+                  <Clock className="w-5 h-5 text-accent" />
+                  <span>{business.timetable}</span>
                 </div>
               </div>
             </div>
@@ -155,24 +143,24 @@ export default function BusinessDetailPage({
             <div className="flex flex-col items-start md:items-end gap-4">
               <div className="text-center md:text-right">
                 <div className="text-5xl font-bold text-accent mb-2">4.5</div>
-                <RatingStars rating={4.5} size="lg" />
-                <p className="text-sm text-muted-foreground mt-2">
-                  Үнэлгээ харуулах
-                </p>
+                <p className="text-sm text-muted-foreground mt-2">Үнэлгээ</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Map */}
-      {business.googleMapUrl && (
+      {/* Map Section */}
+      {business.address && (
         <section className="border-b border-border py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-2xl font-bold text-foreground mb-6">Байршил</h2>
             <div className="bg-muted rounded-lg overflow-hidden">
               <iframe
-                src={business.googleMapUrl}
+                title={`${business.name} байршил`}
+                src={`https://www.google.com/maps?q=${encodeURIComponent(
+                  business.address
+                )}&output=embed`}
                 width="100%"
                 height="400"
                 style={{ border: 0 }}
@@ -182,9 +170,21 @@ export default function BusinessDetailPage({
                 className="w-full"
               />
             </div>
-            <p className="text-sm text-muted-foreground mt-3">
-              {business.address}
-            </p>
+            <div className="mt-3 flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {business.address}
+              </p>
+              <a
+                href={`https://www.google.com/maps?q=${encodeURIComponent(
+                  business.address
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm text-accent hover:text-accent/80 transition-colors"
+              >
+                Google Maps дээр нээх
+              </a>
+            </div>
           </div>
         </section>
       )}
@@ -250,6 +250,61 @@ export default function BusinessDetailPage({
           </div>
         </div>
       </section>
+    </>
+  );
+}
+
+// Loading skeleton
+function BusinessDetailSkeleton() {
+  return (
+    <>
+      <section className="h-64 bg-muted animate-pulse" />
+      <section className="bg-card border-b border-border py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="space-y-4">
+            <div className="h-6 bg-muted rounded w-24 animate-pulse" />
+            <div className="h-10 bg-muted rounded w-1/2 animate-pulse" />
+            <div className="h-20 bg-muted rounded w-3/4 animate-pulse" />
+            <div className="space-y-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-5 bg-muted rounded w-1/3 animate-pulse"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+export default async function BusinessDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <Link
+            href="/search"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
+            <ChevronLeft className="w-5 h-5 text-accent" />
+            <span className="font-semibold text-foreground">Буцах</span>
+          </Link>
+        </div>
+      </header>
+
+      <Suspense fallback={<BusinessDetailSkeleton />}>
+        <BusinessDetails id={id} />
+      </Suspense>
 
       {/* Footer */}
       <footer className="bg-card border-t border-border py-8">
