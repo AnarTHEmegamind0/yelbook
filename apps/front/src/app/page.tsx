@@ -195,7 +195,7 @@ export default function YellowBooksPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 text-balance">
-              Итгэмжлэгдсэн бизнесүүдийг олж нээгээрэй
+              Таны бизнесийн лавлах
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Жинхэнэ хэрэглэгчдийн бодит сэтгэгдэл, үнэлгээнээс үндэслэн зөв
