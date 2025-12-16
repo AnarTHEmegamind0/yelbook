@@ -1,0 +1,38 @@
+
+name: CI
+
+on:
+	push:
+		branches: [main]
+	pull_request:
+
+jobs:
+	build:
+		runs-on: ubuntu-latest
+		steps:
+			- name: Checkout
+				uses: actions/checkout@v4
+
+			- name: Setup Node
+				uses: actions/setup-node@v4
+				with:
+					node-version: 20
+					cache: npm
+
+			- name: Install
+				run: npm ci
+
+			- name: Lint (front)
+				run: npx nx run front:lint
+
+			- name: Build (front)
+				run: npx nx run front:build
+
+			- name: Lint (api)
+				run: npx nx run api:lint
+
+			- name: Typecheck (api)
+				run: npx nx run api:typecheck
+
+			- name: Build (api)
+				run: npx nx run api:build

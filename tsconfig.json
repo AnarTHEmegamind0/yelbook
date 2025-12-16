@@ -5,6 +5,15 @@
   "references": [
     {
       "path": "./apps/front"
+    },
+    {
+      "path": "./apps/api"
+    },
+    {
+      "path": "./libs/contract"
+    },
+    {
+      "path": "./libs/config"
     }
   ]
 }

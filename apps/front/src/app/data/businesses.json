@@ -1,0 +1,146 @@
+{
+  "1": {
+    "id": "1",
+    "name": "TechCorp Solutions",
+    "category": "Technology",
+    "rating": 4.8,
+    "reviewCount": 2341,
+    "description": "Leading cloud infrastructure provider with enterprise solutions for businesses of all sizes.",
+    "image": "/modern-technology-office.png",
+    "address": "123 Tech Street, San Francisco, CA 94105",
+    "phone": "+1 (555) 123-4567",
+    "website": "www.techcorp.example.com",
+    "coordinates": { "lat": 37.7749, "lng": -122.4194 },
+    "tags": ["Cloud Services", "Enterprise", "Reliable"],
+    "reviews": [
+      {
+        "id": 1,
+        "author": "John Smith",
+        "rating": 5,
+        "date": "2 weeks ago",
+        "title": "Excellent service!",
+        "text": "TechCorp provided outstanding support for our migration. Highly recommended!"
+      },
+      {
+        "id": 2,
+        "author": "Sarah Johnson",
+        "rating": 5,
+        "date": "1 month ago",
+        "title": "Best in the industry",
+        "text": "Amazing infrastructure and customer service. Worth every penny."
+      },
+      {
+        "id": 3,
+        "author": "Mike Chen",
+        "rating": 4,
+        "date": "2 months ago",
+        "title": "Good value",
+        "text": "Solid platform with good performance. Minor UI improvements needed."
+      }
+    ]
+  },
+  "2": {
+    "id": "2",
+    "name": "CareFirst Medical",
+    "category": "Healthcare",
+    "rating": 4.9,
+    "reviewCount": 1856,
+    "description": "Comprehensive healthcare services and medical consultations.",
+    "image": "/hospital-healthcare.jpg",
+    "address": "456 Medical Plaza, New York, NY 10001",
+    "phone": "+1 (555) 234-5678",
+    "website": "www.carefirst.example.com",
+    "coordinates": { "lat": 40.7128, "lng": -74.006 },
+    "tags": ["Healthcare", "Professional", "Caring"],
+    "reviews": [
+      {
+        "id": 1,
+        "author": "Emily Davis",
+        "rating": 5,
+        "date": "1 week ago",
+        "title": "Professional and caring",
+        "text": "The doctors are very knowledgeable and take time to listen."
+      },
+      {
+        "id": 2,
+        "author": "Robert Wilson",
+        "rating": 5,
+        "date": "3 weeks ago",
+        "title": "Top-notch facility",
+        "text": "State-of-the-art equipment and excellent staff."
+      }
+    ]
+  },
+  "3": {
+    "id": "3",
+    "name": "FinanceHub Bank",
+    "category": "Finance",
+    "rating": 4.6,
+    "reviewCount": 3124,
+    "description": "Modern banking solutions with personalized financial planning.",
+    "image": "/bank-finance-office.jpg",
+    "address": "789 Finance Ave, Chicago, IL 60601",
+    "phone": "+1 (555) 345-6789",
+    "website": "www.financehub.example.com",
+    "coordinates": { "lat": 41.8781, "lng": -87.6298 },
+    "tags": ["Banking", "Secure", "Innovative"],
+    "reviews": [
+      {
+        "id": 1,
+        "author": "Lisa Anderson",
+        "rating": 5,
+        "date": "5 days ago",
+        "title": "Great investment advice",
+        "text": "Their financial advisors really helped me plan for retirement."
+      },
+      {
+        "id": 2,
+        "author": "James Martinez",
+        "rating": 4,
+        "date": "2 weeks ago",
+        "title": "Solid banking option",
+        "text": "Good rates and customer service could be slightly faster."
+      }
+    ]
+  },
+  "4": {
+    "id": "4",
+    "name": "StyleMart Retail",
+    "category": "Retail",
+    "rating": 4.7,
+    "reviewCount": 4521,
+    "description": "Premium fashion and lifestyle products for all occasions.",
+    "image": "/retail-store-shopping.png",
+    "address": "321 Fashion Blvd, Los Angeles, CA 90001",
+    "phone": "+1 (555) 456-7890",
+    "website": "www.stylemart.example.com",
+    "coordinates": { "lat": 34.0522, "lng": -118.2437 },
+    "tags": ["Fashion", "Quality", "Trendy"],
+    "reviews": [
+      {
+        "id": 1,
+        "author": "Victoria Brown",
+        "rating": 5,
+        "date": "1 day ago",
+        "title": "Love their collections!",
+        "text": "Always have the latest trends. Staff is very helpful."
+      },
+      {
+        "id": 2,
+        "author": "Daniel Lee",
+        "rating": 5,
+        "date": "1 week ago",
+        "title": "Excellent quality",
+        "text": "Clothes are durable and the prices are fair."
+      },
+      {
+        "id": 3,
+        "author": "Amanda Taylor",
+        "rating": 4,
+        "date": "2 weeks ago",
+        "title": "Good experience",
+        "text": "Nice store layout and good variety, but a bit pricey."
+      }
+    ]
+  }
+}
