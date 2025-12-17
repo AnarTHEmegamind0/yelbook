@@ -1,11 +1,15 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect, useState } from 'react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL =
+  typeof window !== 'undefined' && process.env.NODE_ENV === 'production'
+    ? '/api'
+    : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 interface SessionUser {
+  id?: string;
   githubId?: string;
   email?: string | null;
   role?: string;
@@ -13,17 +17,26 @@ interface SessionUser {
 
 /**
  * Get auth headers for API calls
+ * Supports both JWT token (email/password login) and NextAuth session (GitHub OAuth)
  */
 function getAuthHeaders(
-  session: { user?: SessionUser } | null
+  session: { user?: SessionUser } | null,
+  jwtToken: string | null
 ): Record<string, string> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
 
-  if (session?.user) {
+  // First check for JWT token from email/password login
+  if (jwtToken) {
+    headers['Authorization'] = `Bearer ${jwtToken}`;
+  }
+  // Fallback to NextAuth session (GitHub OAuth)
+  else if (session?.user) {
+    // Use githubId if available, otherwise try to extract from id or sub
+    const githubId = session.user.githubId || session.user.id;
     const tokenPayload = {
-      githubId: session.user.githubId,
+      githubId: githubId,
       email: session.user.email,
       role: session.user.role,
     };
@@ -35,11 +48,33 @@ function getAuthHeaders(
 
 /**
  * Hook for authenticated API calls from client components
+ * Supports both JWT token and NextAuth session authentication
  */
 export function useAuthFetch() {
   const { data: session, status } = useSession();
+  const [jwtToken, setJwtToken] = useState<string | null>(null);
 
-  const headers = useMemo(() => getAuthHeaders(session), [session]);
+  // Load JWT token from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('auth_token');
+      setJwtToken(token);
+    }
+  }, []);
+
+  // Debug: Log session data
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('useAuthFetch - session:', session);
+      console.log('useAuthFetch - status:', status);
+      console.log('useAuthFetch - jwtToken:', jwtToken);
+    }
+  }, [session, status, jwtToken]);
+
+  const headers = useMemo(
+    () => getAuthHeaders(session, jwtToken),
+    [session, jwtToken]
+  );
 
   const authFetch = useCallback(
     async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
@@ -115,7 +150,7 @@ export function useAuthFetch() {
     put,
     del,
     headers,
-    isAuthenticated: !!session?.user,
+    isAuthenticated: !!session?.user || !!jwtToken,
     isLoading: status === 'loading',
   };
 }

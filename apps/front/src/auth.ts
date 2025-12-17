@@ -86,8 +86,8 @@ const result = NextAuth({
       // Add role and githubId to session
       if (session.user) {
         session.user.role = (token.role as 'USER' | 'ADMIN') || 'USER';
-        session.user.githubId = token.githubId as string;
-        session.user.id = token.sub || '';
+        session.user.githubId = (token.githubId as string) || '';
+        session.user.id = (token.githubId as string) || token.sub || '';
       }
       return session;
     },

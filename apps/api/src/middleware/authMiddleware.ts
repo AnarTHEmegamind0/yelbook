@@ -77,6 +77,8 @@ export const authMiddleware = async (
           Buffer.from(sessionToken, 'base64').toString()
         );
 
+        console.log('Auth middleware - decoded userInfo:', userInfo);
+
         if (userInfo && userInfo.githubId) {
           const user = await prisma.user.findUnique({
             where: { githubId: userInfo.githubId },
@@ -89,12 +91,15 @@ export const authMiddleware = async (
             },
           });
 
+          console.log('Auth middleware - found user:', user);
+
           if (user) {
             req.user = user as Request['user'];
             return next();
           }
         }
-      } catch {
+      } catch (err) {
+        console.error('Auth middleware - error decoding token:', err);
         // Continue to unauthorized
       }
     }

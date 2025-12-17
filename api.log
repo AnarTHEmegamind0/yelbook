@@ -1,1 +1,8 @@
-[ ready ] http://localhost:3001
+
+ NX   Running target serve for project @yelbook/api and 1 task it depends on:
+
+
+
+> nx run @yelbook/api:build:production
+
+Waiting for @yelbook/api:serve:development in another nx process
