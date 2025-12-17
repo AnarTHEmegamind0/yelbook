@@ -106,35 +106,43 @@ async function findRelevantBusinesses(
   const queryLower = query.toLowerCase();
   const keywords = queryLower.split(/\s+/);
 
-  const scored = businesses.map((business) => {
-    const searchText =
-      `${business.name} ${business.description} ${business.category.name} ${business.address}`.toLowerCase();
-    let score = 0;
+  type BusinessResult = (typeof businesses)[number];
+  type ScoredBusiness = {
+    business: BusinessResult;
+    score: number;
+  };
 
-    for (const keyword of keywords) {
-      if (searchText.includes(keyword)) {
-        score += 1;
+  const scored: ScoredBusiness[] = businesses.map(
+    (business: BusinessResult) => {
+      const searchText =
+        `${business.name} ${business.description} ${business.category.name} ${business.address}`.toLowerCase();
+      let score = 0;
+
+      for (const keyword of keywords) {
+        if (searchText.includes(keyword)) {
+          score += 1;
+        }
       }
-    }
 
-    // Boost exact name matches
-    if (business.name.toLowerCase().includes(queryLower)) {
-      score += 5;
-    }
+      // Boost exact name matches
+      if (business.name.toLowerCase().includes(queryLower)) {
+        score += 5;
+      }
 
-    // Boost category matches
-    if (business.category.name.toLowerCase().includes(queryLower)) {
-      score += 3;
-    }
+      // Boost category matches
+      if (business.category.name.toLowerCase().includes(queryLower)) {
+        score += 3;
+      }
 
-    return { business, score };
-  });
+      return { business, score };
+    }
+  );
 
   return scored
-    .filter((s) => s.score > 0)
-    .sort((a, b) => b.score - a.score)
+    .filter((s: ScoredBusiness) => s.score > 0)
+    .sort((a: ScoredBusiness, b: ScoredBusiness) => b.score - a.score)
     .slice(0, topK)
-    .map((s) => s.business as unknown as Business);
+    .map((s: ScoredBusiness) => s.business as unknown as Business);
 }
 
 router.post('/yellow-books/search', async (req, res) => {
