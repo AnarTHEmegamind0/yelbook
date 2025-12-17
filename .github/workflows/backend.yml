@@ -47,6 +47,8 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate --schema=prisma/schema.prisma
         working-directory: apps/api
+        env:
+          DATABASE_URL: 'postgresql://dummy:dummy@localhost:5432/dummy'
 
       - name: Lint
         run: npx nx run api:lint
