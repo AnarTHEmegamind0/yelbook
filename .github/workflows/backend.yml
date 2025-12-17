@@ -44,6 +44,10 @@ jobs:
       - name: Install
         run: npm ci --legacy-peer-deps
 
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        working-directory: apps/api
+
       - name: Lint
         run: npx nx run api:lint
         env:
