@@ -17,6 +17,7 @@ env:
   ECR_REPOSITORY: yelbook-frontend
   EKS_CLUSTER_NAME: yelbook-cluster
   K8S_NAMESPACE: yellowbooks
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 permissions:
   id-token: write
