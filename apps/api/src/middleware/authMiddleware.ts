@@ -2,18 +2,19 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma';
 
-// Extend Express Request type to include user
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: number;
-        email: string;
-        name: string | null;
-        role: 'USER' | 'ADMIN';
-        githubId: string | null;
-      };
-    }
+// User type for request augmentation
+export interface AuthUser {
+  id: number;
+  email: string;
+  name: string | null;
+  role: 'USER' | 'ADMIN';
+  githubId: string | null;
+}
+
+// Extend Express Request type
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: AuthUser;
   }
 }
 
