@@ -4,13 +4,15 @@ metadata:
   name: yelbook-config
   namespace: yellowbooks
 data:
-  NODE_ENV: "production"
-  HOST: "0.0.0.0"
-  PORT_API: "3001"
-  PORT_FRONTEND: "3000"
-  NEXT_PUBLIC_API_URL: "https://yelbook.online/api"
-  AUTH_URL: "https://yelbook.online"
-  CORS_ORIGIN: "https://yelbook.online"
-  REDIS_URL: "redis://redis:6379"
-  NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: "AIzaSyBUPg0yHBq1433NhNksnhfz5efYOMb6wL4"
-  ADMIN_GITHUB_ID: "82940783"
+  NODE_ENV: 'production'
+  HOST: '0.0.0.0'
+  PORT_API: '3001'
+  PORT_FRONTEND: '3000'
+  NEXT_PUBLIC_API_URL: 'https://yelbook.online/api'
+  # Internal K8s service URL for server-side API calls (pod-to-pod communication)
+  INTERNAL_API_URL: 'http://api:3001'
+  AUTH_URL: 'https://yelbook.online'
+  CORS_ORIGIN: 'https://yelbook.online'
+  REDIS_URL: 'redis://redis:6379'
+  NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'AIzaSyBUPg0yHBq1433NhNksnhfz5efYOMb6wL4'
+  ADMIN_GITHUB_ID: '82940783'

@@ -38,8 +38,11 @@ const result = NextAuth({
     async signIn({ user, profile }) {
       if (profile) {
         const githubId = String(profile.id);
+        // Use internal K8s service URL for server-side calls, fallback to public URL
         const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+          process.env.INTERNAL_API_URL ||
+          process.env.NEXT_PUBLIC_API_URL ||
+          'http://localhost:3001';
 
         try {
           // Call the backend to create or update user

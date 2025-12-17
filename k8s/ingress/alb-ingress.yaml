@@ -22,7 +22,29 @@ spec:
     - host: yelbook.online
       http:
         paths:
-          # NextAuth routes must go to frontend (Next.js handles /api/auth/*)
+          # Backend auth routes (login, me, github sync)
+          - path: /api/auth/login
+            pathType: Exact
+            backend:
+              service:
+                name: api
+                port:
+                  number: 3001
+          - path: /api/auth/me
+            pathType: Exact
+            backend:
+              service:
+                name: api
+                port:
+                  number: 3001
+          - path: /api/auth/github
+            pathType: Exact
+            backend:
+              service:
+                name: api
+                port:
+                  number: 3001
+          # NextAuth routes go to frontend (Next.js handles /api/auth/*)
           - path: /api/auth
             pathType: Prefix
             backend:
