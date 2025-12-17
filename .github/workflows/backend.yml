@@ -60,6 +60,11 @@ jobs:
         env:
           NX_NO_CLOUD: true
 
+      - name: Build
+        run: npx nx run api:build:production
+        env:
+          NX_NO_CLOUD: true
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
