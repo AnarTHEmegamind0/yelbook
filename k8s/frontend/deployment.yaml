@@ -60,6 +60,8 @@ spec:
                 configMapKeyRef:
                   name: yelbook-config
                   key: ADMIN_GITHUB_ID
+            - name: INTERNAL_API_URL
+              value: 'http://api:3001'
           resources:
             requests:
               memory: '128Mi'

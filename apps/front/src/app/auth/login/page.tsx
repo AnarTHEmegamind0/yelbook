@@ -24,8 +24,11 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
+      // Client-side: use relative /api in production, localhost in dev
       const baseUrl =
-        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        process.env.NODE_ENV === 'production'
+          ? '/api'
+          : 'http://localhost:3001';
       const res = await fetch(`${baseUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

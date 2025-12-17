@@ -4,10 +4,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeft, MapPin, Phone, Globe, Mail, Clock } from 'lucide-react';
 import { Badge } from '../components/ui/badge';
+import { getServerApiUrl } from '../lib/api';
 
 // SSG: Generate static params at build time
 export async function generateStaticParams() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const baseUrl = getServerApiUrl();
 
   try {
     const res = await fetch(`${baseUrl}/search`);
@@ -49,7 +50,7 @@ interface Business {
 }
 
 async function getBusiness(id: string): Promise<Business | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const baseUrl = getServerApiUrl();
 
   try {
     const res = await fetch(`${baseUrl}/businesses/${id}`, {

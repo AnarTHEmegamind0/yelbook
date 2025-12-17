@@ -4,6 +4,7 @@ import { ChevronRight, Bot } from 'lucide-react';
 import { BusinessCard } from './components/business-card';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
+import { getServerApiUrl } from './lib/api';
 
 // ISR with 60 second revalidation
 export const revalidate = 60;
@@ -35,7 +36,7 @@ interface Category {
 
 // Server-side data fetching with ISR
 async function getHomeData() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const baseUrl = getServerApiUrl();
 
   try {
     const res = await fetch(`${baseUrl}/`, {

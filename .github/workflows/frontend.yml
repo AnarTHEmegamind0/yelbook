@@ -48,6 +48,11 @@ jobs:
         env:
           NX_NO_CLOUD: true
 
+      - name: Build Next.js app
+        run: npx nx run front:build
+        env:
+          NX_NO_CLOUD: true
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -64,10 +69,6 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build \
-            --build-arg NODE_ENV=production \
-            --build-arg PORT=3000 \
-            --build-arg HOSTNAME=0.0.0.0 \
-            --build-arg NEXT_PUBLIC_API_URL=https://yelbook.online/api \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
             -f apps/front/Dockerfile .

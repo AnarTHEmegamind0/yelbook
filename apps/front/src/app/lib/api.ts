@@ -1,6 +1,26 @@
 import { getSession } from './auth/session';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// For server-side rendering (SSR/SSG), we need internal K8s service URL
+// For client-side, use relative /api URL (same domain via ALB ingress)
+// In development, use localhost:3001
+function getApiBaseUrl(isServer = false): string {
+  if (process.env.NODE_ENV !== 'production') {
+    return 'http://localhost:3001';
+  }
+  // In production:
+  // - Server components use internal K8s URL
+  // - Client components use relative /api path
+  if (isServer) {
+    return process.env.INTERNAL_API_URL || 'http://api:3001';
+  }
+  return '/api';
+}
+
+// For client components (relative URL)
+const API_BASE_URL = getApiBaseUrl(false);
+
+// Export for server components
+export const getServerApiUrl = () => getApiBaseUrl(true);
 
 /**
  * Authenticated fetch helper for API calls

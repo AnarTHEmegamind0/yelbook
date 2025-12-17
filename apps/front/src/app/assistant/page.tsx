@@ -40,7 +40,9 @@ interface Message {
   businesses?: Business[];
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// Client-side API URL: use relative /api in production, localhost in dev
+const API_URL =
+  process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3001';
 
 export default function AssistantPage() {
   const [messages, setMessages] = useState<Message[]>([

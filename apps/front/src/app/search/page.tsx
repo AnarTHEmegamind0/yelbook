@@ -6,6 +6,7 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { MapIsland } from './map-island';
+import { getServerApiUrl } from '../lib/api';
 
 // Force SSR - no caching
 export const dynamic = 'force-dynamic';
@@ -39,7 +40,7 @@ interface SearchPageProps {
 const ITEMS_PER_PAGE = 12;
 
 async function getSearchData() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const baseUrl = getServerApiUrl();
 
   try {
     const res = await fetch(`${baseUrl}/search`, {
