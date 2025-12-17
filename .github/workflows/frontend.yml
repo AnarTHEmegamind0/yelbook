@@ -44,6 +44,8 @@ jobs:
 
       - name: Lint
         run: npx nx run front:lint
+        env:
+          NX_NO_CLOUD: true
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -98,7 +100,7 @@ jobs:
           kubectl set image deployment/frontend \
             frontend=804257878061.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG \
             -n ${{ env.K8S_NAMESPACE }}
-          
+
           # Wait for rollout to complete
           kubectl rollout status deployment/frontend -n ${{ env.K8S_NAMESPACE }} --timeout=300s
 
@@ -114,24 +116,24 @@ jobs:
       - name: Health Check
         run: |
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://yelbook.online" || echo "000")
-          
+
           echo "## Frontend Health Check Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Deployment Time:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
           echo "**Commit SHA:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "**Frontend URL:** https://yelbook.online" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "### Frontend Endpoint Check" >> $GITHUB_STEP_SUMMARY
           echo "| Endpoint | Status | Result |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|--------|--------|" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "304" ]; then
             echo "| GET / | ${HTTP_STATUS} | :white_check_mark: Healthy |" >> $GITHUB_STEP_SUMMARY
           else
             echo "| GET / | ${HTTP_STATUS} | :warning: Check Required |" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Docker Image" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

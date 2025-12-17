@@ -45,9 +45,13 @@ jobs:
 
       - name: Lint
         run: npx nx run api:lint
+        env:
+          NX_NO_CLOUD: true
 
       - name: Typecheck
         run: npx nx run api:typecheck
+        env:
+          NX_NO_CLOUD: true
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -101,7 +105,7 @@ jobs:
           kubectl set image deployment/api \
             api=804257878061.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG \
             -n ${{ env.K8S_NAMESPACE }}
-          
+
           # Wait for rollout to complete
           kubectl rollout status deployment/api -n ${{ env.K8S_NAMESPACE }} --timeout=300s
 
@@ -109,11 +113,11 @@ jobs:
         run: |
           # Delete old job if exists
           kubectl delete job prisma-migration -n ${{ env.K8S_NAMESPACE }} --ignore-not-found
-          
+
           # Update job image and apply
           sed -i 's|image:.*yelbook-backend:.*|image: 804257878061.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}|' k8s/jobs/migration-job.yaml
           kubectl apply -f k8s/jobs/migration-job.yaml
-          
+
           # Wait for completion
           kubectl wait --for=condition=complete job/prisma-migration -n ${{ env.K8S_NAMESPACE }} --timeout=120s || true
 
@@ -129,24 +133,24 @@ jobs:
       - name: Health Check
         run: |
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://yelbook.online/api" || echo "000")
-          
+
           echo "## Backend Health Check Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Deployment Time:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
           echo "**Commit SHA:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "**API URL:** https://yelbook.online/api" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "### API Endpoint Check" >> $GITHUB_STEP_SUMMARY
           echo "| Endpoint | Status | Result |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|--------|--------|" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "304" ]; then
             echo "| GET /api | ${HTTP_STATUS} | :white_check_mark: Healthy |" >> $GITHUB_STEP_SUMMARY
           else
             echo "| GET /api | ${HTTP_STATUS} | :warning: Check Required |" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Docker Image" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
