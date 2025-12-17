@@ -11,6 +11,9 @@ const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3001;
 const app = express();
 
+// Create API router for /api prefix (used in production with ALB)
+const apiRouter = express.Router();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -22,17 +25,22 @@ app.use(
   })
 );
 
+// Health check endpoint at root level
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 //  auth router
-app.use('/auth', authRouter);
+apiRouter.use('/auth', authRouter);
 
 // admin router
-app.use('/admin', adminRouter);
+apiRouter.use('/admin', adminRouter);
 
 // AI router
-app.use('/ai', aiRouter);
+apiRouter.use('/ai', aiRouter);
 
 // GET / - show all Prisma data (users, businesses, categories)
-app.get('/', async (req, res) => {
+apiRouter.get('/', async (req, res) => {
   try {
     const categories = await prisma.category.findMany();
     const businesses = await prisma.business.findMany({ take: 4 });
@@ -44,7 +52,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-app.get('/search', async (req, res) => {
+apiRouter.get('/search', async (req, res) => {
   try {
     const categories = await prisma.category.findMany();
     const businesses = await prisma.business.findMany();
@@ -57,7 +65,7 @@ app.get('/search', async (req, res) => {
 });
 
 // GET /businesses/:id - get single business by id (public)
-app.get('/businesses/:id', async (req, res) => {
+apiRouter.get('/businesses/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const business = await prisma.business.findUnique({
@@ -77,6 +85,11 @@ app.get('/businesses/:id', async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// Mount API router at /api prefix for production (ALB routing)
+// Also mount at root for backwards compatibility in development
+app.use('/api', apiRouter);
+app.use('/', apiRouter);
 
 app.listen(port, host, () => {
   console.log(`[ ready ] http://${host}:${port}`);

@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prisma-seed
+  namespace: yellowbooks
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      containers:
+        - name: seed
+          image: 804257878061.dkr.ecr.us-east-1.amazonaws.com/yelbook-backend:latest
+          command: ["npx", "prisma", "db", "seed"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: yelbook-secrets
+                  key: DATABASE_URL
+            - name: ADMIN_GITHUB_ID
+              value: "82940783"
+      restartPolicy: Never
+  backoffLimit: 1

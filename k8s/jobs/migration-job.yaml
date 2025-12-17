@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prisma-migration
+  namespace: yellowbooks
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      containers:
+        - name: migration
+          image: 804257878061.dkr.ecr.us-east-1.amazonaws.com/yelbook-backend:latest
+          command: ["npx", "prisma", "migrate", "deploy", "--schema=prisma/schema.prisma"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: yelbook-secrets
+                  key: DATABASE_URL
+      restartPolicy: Never
+  backoffLimit: 3

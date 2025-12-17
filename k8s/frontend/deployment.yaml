@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: yellowbooks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: 804257878061.dkr.ecr.us-east-1.amazonaws.com/yelbook-frontend:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PORT
+              value: '3000'
+            - name: HOSTNAME
+              value: '0.0.0.0'
+            - name: NODE_ENV
+              value: 'production'
+            - name: AUTH_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: yelbook-config
+                  key: AUTH_URL
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: yelbook-secrets
+                  key: AUTH_SECRET
+            - name: AUTH_GITHUB_ID
+              valueFrom:
+                secretKeyRef:
+                  name: yelbook-secrets
+                  key: AUTH_GITHUB_ID
+            - name: AUTH_GITHUB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: yelbook-secrets
+                  key: AUTH_GITHUB_SECRET
+            - name: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: yelbook-config
+                  key: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+            - name: ADMIN_GITHUB_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: yelbook-config
+                  key: ADMIN_GITHUB_ID
+          resources:
+            requests:
+              memory: '128Mi'
+              cpu: '100m'
+            limits:
+              memory: '256Mi'
+              cpu: '250m'
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10

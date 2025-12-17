@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: yellowbooks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: 804257878061.dkr.ecr.us-east-1.amazonaws.com/yelbook-backend:latest
+          ports:
+            - containerPort: 3001
+          env:
+            - name: HOST
+              value: '0.0.0.0'
+            - name: PORT
+              value: '3001'
+            - name: NODE_ENV
+              value: 'production'
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: yelbook-secrets
+                  key: DATABASE_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: yelbook-secrets
+                  key: JWT_SECRET
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: yelbook-secrets
+                  key: AUTH_SECRET
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: yelbook-secrets
+                  key: GROQ_API_KEY
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: yelbook-config
+                  key: REDIS_URL
+            - name: CORS_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: yelbook-config
+                  key: CORS_ORIGIN
+            - name: ADMIN_GITHUB_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: yelbook-config
+                  key: ADMIN_GITHUB_ID
+          resources:
+            requests:
+              memory: '128Mi'
+              cpu: '100m'
+            limits:
+              memory: '256Mi'
+              cpu: '250m'
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3001
+            initialDelaySeconds: 15
+            periodSeconds: 10
